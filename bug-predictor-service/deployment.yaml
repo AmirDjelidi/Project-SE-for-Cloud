@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bug-predictor-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bug-predictor
+  template:
+    metadata:
+      labels:
+        app: bug-predictor
+    spec:
+      containers:
+      - name: bug-predictor
+        image: amirdj/bug_predictor:v2
+        ports:
+        - containerPort: 3002

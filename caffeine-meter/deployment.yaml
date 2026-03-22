@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caffeine-meter-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caffeine-meter
+  template:
+    metadata:
+      labels:
+        app: caffeine-meter
+    spec:
+      containers:
+      - name: caffeine-meter
+        image: amirdj/caffeine_meter:v2
+        ports:
+        - containerPort: 3001

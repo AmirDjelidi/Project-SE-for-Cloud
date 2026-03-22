@@ -1,0 +1,12 @@
+{
+  "name": "caffeine-meter-service",
+  "version": "1.0.0",
+  "description": "Service 1 : Reçoit la dose de caféine et calcule les lignes de code",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
