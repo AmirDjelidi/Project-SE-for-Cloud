@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caffeine-front-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caffeine-front
+  template:
+    metadata:
+      labels:
+        app: caffeine-front
+    spec:
+      containers:
+      - name: caffeine-front
+        image: amirdj/caffeine_front:v1
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caffeine-front-service
+spec:
+  selector:
+    app: caffeine-front
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
