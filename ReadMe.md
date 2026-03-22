@@ -1,159 +1,74 @@
-# ☁️ Project SE for Cloud: Estimating Developer Productivity and Bug Frequency Based on Caffeine Consumption
+# ☁️ Project SE for Cloud: Caffeine-Driven Bug Predictor
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-success?style=for-the-badge)](http://184.73.140.16)
+[![Infrastructure](https://img.shields.io/badge/Terraform-AWS-orange?style=for-the-badge)](aws-terraform/)
+[![Architecture](https://img.shields.io/badge/Microservices-Docker-blue?style=for-the-badge)](#)
 
 ## 📖 Executive Summary
+This project presents a containerized, distributed microservices system designed to estimate developer productivity (Lines of Code) and bug frequency based on daily caffeine intake. It demonstrates a complete DevOps lifecycle from local container orchestration to automated Cloud provisioning.
 
-This project presents a complete, containerized, and distributed system designed to estimate developer productivity and bug frequency based on daily caffeine intake. The application demonstrates modern cloud-native patterns including Docker containerization, Kubernetes orchestration, Infrastructure as Code (Terraform), and Cloud hosting (AWS), using Nginx as a Reverse Proxy.
-
----
-
-## 🏗️ System Architecture & Microservices
-
-The application is decoupled into distinct layers to ensure high availability and independent scalability:
-
-### 🖥️ Frontend (Next.js Dashboard)
-- Located in: `caffeine-frontend/`
-- Provides a reactive user interface for data input and visualization of results.
-
-### ⚙️ Service 1 – Caffeine Meter (Port 3001)
-- Located in: `caffeine-meter/`
-- Acts as the primary logic orchestrator.
-- Responsibilities:
-  - Receives user input
-  - Calculates estimated **Lines of Code (LOC)**
-  - Makes internal REST calls to the Bug Predictor service
-
-### 🧠 Service 2 – Bug Predictor (Port 3002)
-- Located in: `bug-predictor-service/`
-- Acts as the computation engine and data logger.
-- Responsibilities:
-  - Calculates bug probability based on LOC
-  - Logs all computations into the database
-
-### 🗄️ Database (PostgreSQL – Port 5432)
-- Configuration in: `database/`
-- Ensures persistent storage of:
-  - Analyzed lines of code
-  - Bug rates
-  - Critical errors
-- Main table: `bug_logs`
+**🔴 Live Demo available at:** [http://184.73.140.16](http://184.73.140.16)
 
 ---
 
-## 🐳 Docker Hub Images
+## 🏗️ System Architecture 
 
-The system is distributed using the following Docker images:
+The application is decoupled into distinct, highly available layers:
 
-- `amirdj/caffeine_front`
-- `amirdj/caffeine_meter`
-- `amirdj/bug_predictor`
-
----
-
-## 🛠️ Key Technologies
-
-### 🔄 Orchestration & Containerization
-- Docker
-- Kubernetes (Minikube)
-
-### ☁️ Cloud Deployment & Infrastructure as Code
-- AWS (Region: `us-east-1`)
-- Terraform
-
-### 🧩 Software Architecture
-- Microservices
-- Next.js (Frontend)
-- Node.js / Express (Backend)
-
-### 🗃️ Database
-- PostgreSQL
-
-### 🌐 Network & Gateway
-- Nginx Reverse Proxy (AWS)
-- Kubernetes Ingress Controller
+* **🖥️ Frontend (Next.js):** A reactive UI dynamically routing API calls to prevent CORS issues.
+* **⚙️ Service 1 – Caffeine Meter (Port 3001):** The primary logic orchestrator converting cups to expected Lines of Code (LOC).
+* **🧠 Service 2 – Bug Predictor (Port 3002):** The computation engine assessing bug probability based on LOC complexity.
+* **🗄️ Database (PostgreSQL - Port 5432):** Ensures persistent, stateful storage of all analysis logs (`bug_logs` table).
+* **🌐 Gateway (Nginx):** Acts as a Reverse Proxy on the AWS instance, routing public Port 80 traffic to internal protected ports (3001, 8080).
 
 ---
 
-## 🚀 Running the Project
+## 🚀 How to Run the Project
 
-### 1. 🧪 Local Deployment (Minikube)
+This repository supports multiple environments to showcase both local development and production cloud deployment.
 
-Start the cluster:
-
-```bash
-minikube start
-```
-
-Deploy the database:
+### 1. 💻 Local Development (Docker Compose) - *Recommended*
+The easiest way to test the full stack locally without deploying AWS resources or Kubernetes clusters:
 
 ```bash
-kubectl apply -f database/postgres-deployment.yaml
-kubectl apply -f database/postgres-service.yaml
+# 1. Clone the repository
+git clone [https://github.com/AmirDjelidi/Project-SE-for-Cloud.git](https://github.com/AmirDjelidi/Project-SE-for-Cloud.git)
+cd Project-SE-for-Cloud
+
+# 2. Build and launch all 5 containers (Front, Services, DB, Nginx)
+docker-compose up --build
+
+# 3. Access the application
+Open http://localhost in your browser.
 ```
-
-Deploy backend services:
-
-```bash
-kubectl apply -f caffeine-meter/deployment.yaml
-kubectl apply -f caffeine-meter/service.yaml
-
-kubectl apply -f bug-predictor-service/deployment.yaml
-kubectl apply -f bug-predictor-service/service.yaml
-```
-
-Deploy frontend:
-
-```bash
-kubectl apply -f caffeine-frontend/frontend-k8s.yaml
-```
-
-Apply ingress configuration:
-
-```bash
-kubectl apply -f caffeine-meter/ingress.yaml
-```
-
----
-
-### 2. ☁️ Cloud Deployment (AWS + Terraform)
-
-Navigate to Terraform directory:
-
+### 2. ☁️ Cloud Production (AWS + Terraform)
+The production environment is hosted on an AWS t3.micro instance.
 ```bash
 cd aws-terraform/
-```
-
-Initialize Terraform:
-
-```bash
 terraform init
-```
-
-Provision infrastructure:
-
-```bash
 terraform apply
 ```
+*Note: The AWS EC2 instance pulls the images directly from Docker Hub (amirdj/caffeine_front:v3, amirdj/caffeine_meter:v3, amirdj/bug_predictor:v3) and uses a host-network Docker configuration behind an Nginx gateway.*
 
-This will create an AWS `t3.micro` instance.
+### 3. ☸️ Alternative Local Orchestration (Kubernetes)
+For orchestration grading purposes, Kubernetes manifests are provided.
+```bash
+minikube start
+kubectl apply -f database/
+kubectl apply -f bug-predictor-service/
+kubectl apply -f caffeine-meter/
+kubectl apply -f caffeine-frontend/
+```
+## 🛠️ Tech Stack & DevOps Tools
+* Infrastructure as Code: Terraform
+* Cloud Provider: AWS (EC2, Security Groups)
 
----
+* Orchestration: Docker Compose, Kubernetes (Minikube)
 
-## 🌐 Gateway Pattern (Cloud)
+* Backend: Node.js, Express, PostgreSQL
 
-An **Nginx Reverse Proxy** is configured on the AWS instance:
+* Frontend: Next.js, Tailwind CSS
 
-- Requests to `/api` → routed to **Caffeine Meter (Port 3001)**
-- All other requests → routed to **Frontend (Port 8080)**
-
-This architecture mimics Kubernetes Ingress behavior, ensuring:
-
-- Clean API routing
-- No exposure of internal service ports
-- Improved security and abstraction
-
----
-
-## 👨‍💻 Author
-
-**Amir Djelidi**
-
+* Networking: Nginx Reverse Proxy
+##
+### 👨‍💻 Author: Amir Djelidi
